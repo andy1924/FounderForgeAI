@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Text:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --background-color: #f5f5f7;
+            --container-bg: #ffffff;
+            --text-color: #1d1d1f;
+            --secondary-text-color: #86868b;
+            --border-color: #d2d2d7;
+            --primary-accent: #007aff;
+            --primary-accent-hover: #0060df;
+            --danger-color: #ff3b30;
+            --danger-bg: #fff0f0;
+        }
+
+        html[data-theme='dark'] {
+            --background-color: #1c1c1e;
+            --container-bg: #2c2c2e;
+            --text-color: #f2f2f7;
+            --secondary-text-color: #98989d;
+            --border-color: #48484a;
+            --disabled-color: #5d5d5f;
+            --danger-color: #ff453a;
+            --danger-bg: #381a17;
+        }
+
+        body {
+            font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px 20px;
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--container-bg);
+            padding: 48px;
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 8px;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        h1 em {
+            color: var(--secondary-text-color);
+            font-style: normal;
+            font-weight: 500;
+            font-size: 24px;
+        }
+        .section-header {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-top: 40px;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .analysis-section {
+            margin-bottom: 30px;
+        }
+        .analysis-section h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-color);
+        }
+        .analysis-section p {
+            background-color: var(--background-color);
+            padding: 20px;
+            border-radius: 12px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.6;
+            border: 1px solid var(--border-color);
+            margin-top: 0;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .error {
+            color: var(--danger-color);
+            background-color: var(--danger-bg);
+            border: 1px solid var(--danger-color);
+            padding: 20px;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+        .button {
+            display: inline-block;
+            text-decoration: none;
+            background-color: var(--primary-accent);
+            color: white;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 16px;
+            margin-top: 24px;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .button:hover {
+            background-color: var(--primary-accent-hover);
+            transform: scale(1.02);
+        }
+        .button:active {
+            transform: scale(0.98);
+        }
+        .button.secondary {
+            background-color: var(--secondary-text-color);
+        }
+        .button.secondary:hover {
+            background-color: #6c6c70;
+        }
+        .downloads-container {
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Analysis for: <em>"{{ idea }}"</em></h1>
+
+        {% if results.error %}
+            <h2 class="section-header">An Error Occurred</h2>
+            <div class="error"><p>{{ results.error }}</p></div>
+        {% else %}
+            <div class="downloads-container">
+                <h2 class="section-header">Resources</h2>
+                {% if results.ppt_path %}
+                    <a href="{{ url_for('static', filename=results.ppt_path) }}" class="button" download>Download Pitch Deck PPT</a>
+                {% else %}
+                    <p style="color:var(--secondary-text-color);">This idea was scrapped, so no pitch deck was generated.</p>
+                {% endif %}
+            </div>
+
+            <h2 class="section-header">Boardroom Simulation</h2>
+            {% for section, text in results.analysis_sections.items() %}
+                <div class="analysis-section">
+                    <h3>{{ section }}</h3>
+                    <p>{{ text }}</p>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <hr style="border: 0; height: 1px; background: var(--border-color); margin-top: 40px; margin-bottom: 24px;">
+        <a href="/" class="button secondary">Analyze Another Idea</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const html = document.documentElement;
+            const savedTheme = localStorage.getItem('theme');
+
+            if (savedTheme === 'dark') {
+                html.setAttribute('data-theme', 'dark');
+            } else if (savedTheme === 'light') {
+                html.removeAttribute('data-theme');
+            } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                html.setAttribute('data-theme', 'dark');
+            }
+        });
+    </script>
+</body>
+</html>
